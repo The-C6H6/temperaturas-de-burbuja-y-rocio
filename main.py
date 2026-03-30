@@ -1,162 +1,229 @@
-import flet as ft
 import math
+import flet as ft
+from antoine import SUSTANCIAS
 
-# Datos tomados de la tabla mostrada
-SUSTANCIAS = {
-    "Acetona": {"formula": "C3H6O", "A": 14.3145, "B": 2756.22, "C": 228.060, "t_min": -26, "t_max": 77},
-    "Ácido acético": {"formula": "C2H4O2", "A": 15.0717, "B": 3580.80, "C": 224.650, "t_min": 24, "t_max": 142},
-    "Acetonitrilo": {"formula": "C2H3N", "A": 14.8950, "B": 3413.10, "C": 250.523, "t_min": -27, "t_max": 81},
-    "Benceno": {"formula": "C6H6", "A": 13.7819, "B": 2726.81, "C": 217.572, "t_min": 6, "t_max": 104},
-    "iso-Butano": {"formula": "C4H10", "A": 13.8254, "B": 2181.79, "C": 248.870, "t_min": -83, "t_max": 7},
-    "n-Butano": {"formula": "C4H10", "A": 13.6608, "B": 2154.70, "C": 238.789, "t_min": -73, "t_max": 19},
-    "1-Butanol": {"formula": "C4H10O", "A": 15.3144, "B": 3212.43, "C": 182.739, "t_min": 37, "t_max": 138},
-    "2-Butanol": {"formula": "C4H10O", "A": 15.1989, "B": 3026.03, "C": 186.500, "t_min": 25, "t_max": 120},
-    "iso-Butanol": {"formula": "C4H10O", "A": 14.6047, "B": 2740.95, "C": 166.670, "t_min": 30, "t_max": 128},
-    "tert-Butanol": {"formula": "C4H10O", "A": 14.8445, "B": 2658.29, "C": 177.650, "t_min": 10, "t_max": 101},
-    "Tetracloruro de carbono": {"formula": "CCl4", "A": 14.0572, "B": 2914.23, "C": 232.148, "t_min": -14, "t_max": 101},
-    "Clorobenceno": {"formula": "C6H5Cl", "A": 13.8635, "B": 3174.78, "C": 211.700, "t_min": 29, "t_max": 159},
-    "1-Clorobutano": {"formula": "C4H9Cl", "A": 13.7965, "B": 2723.73, "C": 218.265, "t_min": -17, "t_max": 79},
-    "Cloroformo": {"formula": "CHCl3", "A": 13.7324, "B": 2548.74, "C": 218.552, "t_min": -23, "t_max": 84},
-    "Ciclohexano": {"formula": "C6H12", "A": 13.6568, "B": 2723.44, "C": 220.618, "t_min": 9, "t_max": 105},
-    "Ciclopentano": {"formula": "C5H10", "A": 13.9727, "B": 2653.90, "C": 234.510, "t_min": -35, "t_max": 71},
-    "n-Decano": {"formula": "C10H22", "A": 13.9748, "B": 3442.76, "C": 193.858, "t_min": 65, "t_max": 203},
-    "Diclorometano": {"formula": "CH2Cl2", "A": 13.9891, "B": 2463.93, "C": 223.240, "t_min": -38, "t_max": 60},
-    "Éter dietílico": {"formula": "C4H10O", "A": 14.0735, "B": 2511.29, "C": 231.200, "t_min": -43, "t_max": 55},
-    "1,4 Dioxeno": {"formula": "C4H8O2", "A": 15.0967, "B": 3579.78, "C": 240.337, "t_min": 20, "t_max": 105},
-    "n-Eicosano": {"formula": "C20H42", "A": 14.4575, "B": 4680.46, "C": 132.100, "t_min": 208, "t_max": 379},
-    "Etanol": {"formula": "C2H6O", "A": 16.8958, "B": 3795.17, "C": 230.918, "t_min": 3, "t_max": 96},
-    "Etilbenceno": {"formula": "C8H10", "A": 13.9726, "B": 3259.93, "C": 212.300, "t_min": 33, "t_max": 163},
-    "Etilenglicol": {"formula": "C2H6O2", "A": 15.7567, "B": 4187.46, "C": 178.650, "t_min": 100, "t_max": 222},
-    "n-Heptano": {"formula": "C7H16", "A": 13.8622, "B": 2910.26, "C": 216.432, "t_min": 4, "t_max": 123},
-    "n-Hexano": {"formula": "C6H14", "A": 13.8193, "B": 2696.04, "C": 224.317, "t_min": -19, "t_max": 92},
-    "Metanol": {"formula": "CH4O", "A": 16.5785, "B": 3638.27, "C": 239.500, "t_min": -11, "t_max": 83},
-    "Acetato de metilo": {"formula": "C3H6O2", "A": 14.2456, "B": 2662.78, "C": 219.690, "t_min": -23, "t_max": 78},
-    "Metil etil cetona": {"formula": "C4H8O", "A": 14.1334, "B": 2838.24, "C": 218.690, "t_min": -8, "t_max": 103},
-    "Nitrometano": {"formula": "CH3NO2", "A": 14.7513, "B": 3331.70, "C": 227.600, "t_min": 56, "t_max": 146},
-    "n-Nonano": {"formula": "C9H20", "A": 13.9854, "B": 3311.19, "C": 202.694, "t_min": 46, "t_max": 178},
-    "iso-Octano": {"formula": "C8H18", "A": 13.6703, "B": 2896.31, "C": 220.767, "t_min": 2, "t_max": 125},
-    "n-Octano": {"formula": "C8H18", "A": 13.9346, "B": 3123.13, "C": 209.635, "t_min": 26, "t_max": 152},
-    "n-Pentano": {"formula": "C5H12", "A": 13.7667, "B": 2451.88, "C": 232.014, "t_min": -45, "t_max": 58},
-    "Fenol": {"formula": "C6H6O", "A": 14.4387, "B": 3507.80, "C": 175.400, "t_min": 80, "t_max": 208},
-    "1-Propanol": {"formula": "C3H8O", "A": 16.1154, "B": 3483.67, "C": 205.807, "t_min": 20, "t_max": 116},
-    "2-Propanol": {"formula": "C3H8O", "A": 16.6796, "B": 3640.20, "C": 219.610, "t_min": 8, "t_max": 100},
-    "Tolueno": {"formula": "C7H8", "A": 13.9320, "B": 3056.96, "C": 217.625, "t_min": 13, "t_max": 136},
-    "Agua": {"formula": "H2O", "A": 16.3872, "B": 3885.70, "C": 230.170, "t_min": 0, "t_max": 200},
-    "o-Xileno": {"formula": "C8H10", "A": 14.0415, "B": 3358.79, "C": 212.041, "t_min": 40, "t_max": 172},
-    "m-Xileno": {"formula": "C8H10", "A": 14.1387, "B": 3381.81, "C": 216.120, "t_min": 35, "t_max": 166},
-    "p-Xileno": {"formula": "C8H10", "A": 14.0579, "B": 3331.45, "C": 214.627, "t_min": 35, "t_max": 166},
-}
+
+def opciones_sustancias():
+    return [
+        ft.dropdown.Option(
+            key=nombre,
+            text=f"{nombre} ({datos['formula']})"
+        )
+        for nombre, datos in SUSTANCIAS.items()
+    ]
+
+
+def calcular_presion_antoine(nombre_sustancia, temperatura):
+    datos = SUSTANCIAS[nombre_sustancia]
+    A = datos["A"]
+    B = datos["B"]
+    C = datos["C"]
+
+    valor_ln = A - (B / (temperatura + C))
+    presion = math.exp(valor_ln)
+
+    aviso = ""
+    if temperatura < datos["t_min"] or temperatura > datos["t_max"]:
+        aviso = (
+            f"\nAviso: la temperatura {temperatura:.2f} °C está fuera del intervalo "
+            f"recomendado [{datos['t_min']} a {datos['t_max']}] °C."
+        )
+
+    procedimiento = (
+        f"Sustancia: {nombre_sustancia} ({datos['formula']})\n"
+        f"A = {A}\n"
+        f"B = {B}\n"
+        f"C = {C}\n"
+        f"t = {temperatura:.2f} °C\n\n"
+        f"Procedimiento:\n"
+        f"P = Exp(A - B/(t + C))\n"
+        f"P = Exp({A} - {B}/({temperatura:.2f} + {C}))\n"
+        f"P = Exp({A} - {B/(temperatura + C):.6f})\n"
+        f"P = Exp({valor_ln:.6f})\n"
+        f"P = {presion:.6f} kPa"
+        f"{aviso}"
+    )
+
+    return procedimiento
 
 
 def main(page: ft.Page):
     page.title = "Calculadora de presión de vapor"
-    page.window_width = 780
-    page.window_height = 760
+    page.window_width = 950
+    page.window_height = 850
     page.scroll = ft.ScrollMode.AUTO
     page.padding = 20
 
-    titulo = ft.Text(
-        "Cálculo de presión de vapor con ecuación de Antoine",
-        size=24,
-        weight=ft.FontWeight.BOLD,
-    )
+    controles_dinamicos = []
+    area_entradas = ft.Column(spacing=12)
+    area_resultados = ft.Column(spacing=12)
 
-    descripcion = ft.Text(
-        "Selecciona una sustancia, escribe la temperatura en °C y calcula la presión de vapor en kPa."
-    )
-
-    dropdown_sustancia = ft.Dropdown(
-        label="Sustancia pura",
-        width=420,
-        options=[
-            ft.dropdown.Option(
-                key=nombre,
-                text=f"{nombre} ({datos['formula']})"
-            )
-            for nombre, datos in SUSTANCIAS.items()
-        ],
-    )
-
-    temperatura = ft.TextField(
-        label="Temperatura (°C)",
-        width=220,
-        keyboard_type=ft.KeyboardType.NUMBER,
-        hint_text="Ejemplo: 25"
-    )
-
-    resultado = ft.Text("", selectable=True, size=16)
-
-    def calcular(e):
-        if not dropdown_sustancia.value:
-            resultado.value = "Selecciona una sustancia."
-            page.update()
-            return
-
-        if not temperatura.value.strip():
-            resultado.value = "Ingresa la temperatura en °C."
-            page.update()
-            return
-
-        try:
-            t = float(temperatura.value)
-        except ValueError:
-            resultado.value = "La temperatura debe ser numérica."
-            page.update()
-            return
-
-        s = SUSTANCIAS[dropdown_sustancia.value]
-        A = s["A"]
-        B = s["B"]
-        C = s["C"]
-
-        valor_ln = A - (B / (t + C))
-        presion = math.exp(valor_ln)
-
-        aviso = ""
-        if t < s["t_min"] or t > s["t_max"]:
-            aviso = (
-                f"\n\nAviso: la temperatura ingresada ({t:.2f} °C) está fuera del "
-                f"intervalo recomendado de la tabla [{s['t_min']} a {s['t_max']}] °C."
-            )
-
-        procedimiento = (
-            f"Sustancia: {dropdown_sustancia.value} ({s['formula']})\n"
-            f"Datos de Antoine:\n"
-            f"A = {A}\n"
-            f"B = {B}\n"
-            f"C = {C}\n"
-            f"t = {t:.2f} °C\n\n"
-            f"Procedimiento:\n"
-            f"P = Exp(A - B/(t + C))\n"
-            f"P = Exp({A} - {B}/({t:.2f} + {C}))\n"
-            f"P = {presion:.6f} kPa"
-            f"{aviso}"
+    def crear_bloque_captura(indice):
+        dd_sustancia = ft.Dropdown(
+            label=f"Sustancia {indice}",
+            width=420,
+            options=opciones_sustancias(),
         )
 
-        resultado.value = procedimiento
-        page.update()
+        tf_temperatura = ft.TextField(
+            label=f"Temperatura {indice} (°C)",
+            width=220,
+            hint_text="Ejemplo: 25",
+        )
 
-    def limpiar(e):
-        dropdown_sustancia.value = None
-        temperatura.value = ""
-        resultado.value = ""
-        page.update()
+        controles_dinamicos.append(
+            {
+                "dropdown": dd_sustancia,
+                "temperatura": tf_temperatura,
+            }
+        )
 
-    boton_calcular = ft.ElevatedButton("Calcular", on_click=calcular)
-    boton_limpiar = ft.OutlinedButton("Limpiar", on_click=limpiar)
+        return ft.Card(
+            content=ft.Container(
+                padding=15,
+                content=ft.Column(
+                    controls=[
+                        ft.Text(
+                            f"Captura {indice}",
+                            size=16,
+                            weight=ft.FontWeight.BOLD,
+                        ),
+                        ft.Row(
+                            controls=[dd_sustancia, tf_temperatura],
+                            wrap=True,
+                        ),
+                    ],
+                    spacing=10,
+                ),
+            )
+        )
+
+    def crear_entradas(e):
+        controles_dinamicos.clear()
+        area_entradas.controls.clear()
+        area_resultados.controls.clear()
+
+        if not cantidad_dropdown.value:
+            area_entradas.update()
+            area_resultados.update()
+            return
+
+        cantidad = int(cantidad_dropdown.value)
+
+        for i in range(1, cantidad + 1):
+            bloque = crear_bloque_captura(i)
+            area_entradas.controls.append(bloque)
+
+        area_entradas.update()
+        area_resultados.update()
+
+    def calcular_todo(e):
+        area_resultados.controls.clear()
+
+        if not controles_dinamicos:
+            area_resultados.controls.append(
+                ft.Text("Primero selecciona cuántas sustancias deseas calcular.")
+            )
+            area_resultados.update()
+            return
+
+        for i, captura in enumerate(controles_dinamicos, start=1):
+            dd_sustancia = captura["dropdown"]
+            tf_temperatura = captura["temperatura"]
+
+            if not dd_sustancia.value:
+                area_resultados.controls.append(
+                    ft.Text(
+                        f"Error en captura {i}: selecciona una sustancia.",
+                        color=ft.Colors.RED,
+                    )
+                )
+                continue
+
+            if not tf_temperatura.value or not tf_temperatura.value.strip():
+                area_resultados.controls.append(
+                    ft.Text(
+                        f"Error en captura {i}: ingresa una temperatura.",
+                        color=ft.Colors.RED,
+                    )
+                )
+                continue
+
+            try:
+                t = float(tf_temperatura.value)
+            except ValueError:
+                area_resultados.controls.append(
+                    ft.Text(
+                        f"Error en captura {i}: la temperatura debe ser numérica.",
+                        color=ft.Colors.RED,
+                    )
+                )
+                continue
+
+            texto = calcular_presion_antoine(dd_sustancia.value, t)
+
+            area_resultados.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        padding=15,
+                        content=ft.Column(
+                            controls=[
+                                ft.Text(
+                                    f"Resultado {i}",
+                                    size=18,
+                                    weight=ft.FontWeight.BOLD,
+                                ),
+                                ft.Text(texto, selectable=True),
+                            ],
+                            spacing=10,
+                        ),
+                    )
+                )
+            )
+
+        area_resultados.update()
+
+    def limpiar_todo(e):
+        cantidad_dropdown.value = None
+        controles_dinamicos.clear()
+        area_entradas.controls.clear()
+        area_resultados.controls.clear()
+        cantidad_dropdown.update()
+        area_entradas.update()
+        area_resultados.update()
+
+    cantidad_dropdown = ft.Dropdown(
+        label="¿Cuántas sustancias quieres calcular?",
+        width=300,
+        options=[ft.dropdown.Option(str(i)) for i in range(1, 11)],
+        on_select=crear_entradas,
+    )
+
+    btn_calcular = ft.ElevatedButton("Calcular", on_click=calcular_todo)
+    btn_limpiar = ft.OutlinedButton("Limpiar todo", on_click=limpiar_todo)
 
     page.add(
         ft.Column(
             controls=[
-                titulo,
-                descripcion,
+                ft.Text(
+                    "Cálculo de presión de vapor con ecuación de Antoine",
+                    size=24,
+                    weight=ft.FontWeight.BOLD,
+                ),
+                ft.Text(
+                    "Selecciona cuántas sustancias quieres calcular y después captura la sustancia y su temperatura."
+                ),
                 ft.Divider(),
-                dropdown_sustancia,
-                temperatura,
-                ft.Row([boton_calcular, boton_limpiar]),
+                cantidad_dropdown,
+                area_entradas,
+                ft.Row([btn_calcular, btn_limpiar]),
                 ft.Divider(),
-                ft.Text("Resultado y procedimiento:", weight=ft.FontWeight.BOLD),
-                resultado,
+                ft.Text(
+                    "Resultados y procedimiento:",
+                    size=18,
+                    weight=ft.FontWeight.BOLD,
+                ),
+                area_resultados,
             ],
             spacing=15,
         )
