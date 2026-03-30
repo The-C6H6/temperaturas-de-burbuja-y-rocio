@@ -1,4 +1,6 @@
 import math
+from sympy import symbols, Eq, exp, nsolve
+
 
 
 
@@ -49,35 +51,27 @@ SUSTANCIAS = {
 
 
 
-def calcular_presion_antoine(nombre_sustancia, temperatura):
-    datos = SUSTANCIAS[nombre_sustancia]
-    A = datos["A"]
-    B = datos["B"]
-    C = datos["C"]
+def calcular_temperatura_burbuja(controles_dinamicos, presion_sistema):
+    T = symbols("T")
+    sustancias_seleccionadas = [i["dropdown"].value for i in controles_dinamicos]
+    composiciones = [float(i["composicion"].value) for i in controles_dinamicos]       
+    A=[SUSTANCIAS[sustancia]["A"] for sustancia in sustancias_seleccionadas]
+    B=[SUSTANCIAS[sustancia]["B"] for sustancia in sustancias_seleccionadas]
+    C=[SUSTANCIAS[sustancia]["C"] for sustancia in sustancias_seleccionadas]
+    suma_presiones = (1/presion_sistema)*sum([composiciones[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    temperatura = temperatura_burbuja(suma_presiones, T)
+    resultado = f"Ecuación:\n {suma_presiones}= 1\n"
+    resultado = f"Temperatura de burbuja: {temperatura:.2f} °C\n\n"
+    
 
-    valor_ln = A - (B / (temperatura + C))
-    presion = math.exp(valor_ln)
+    return resultado
 
-    aviso = ""
-    if temperatura < datos["t_min"] or temperatura > datos["t_max"]:
-        aviso = (
-            f"\nAviso: la temperatura {temperatura:.2f} °C está fuera del intervalo "
-            f"recomendado [{datos['t_min']} a {datos['t_max']}] °C."
-        )
 
-    procedimiento = (
-        f"Sustancia: {nombre_sustancia} ({datos['formula']})\n"
-        f"A = {A}\n"
-        f"B = {B}\n"
-        f"C = {C}\n"
-        f"t = {temperatura:.2f} °C\n\n"
-        f"Procedimiento:\n"
-        f"P = Exp(A - B/(t + C))\n"
-        f"P = Exp({A} - {B}/({temperatura:.2f} + {C}))\n"
-        f"P = Exp({A} - {B/(temperatura + C):.6f})\n"
-        f"P = Exp({valor_ln:.6f})\n"
-        f"P = {presion:.6f} kPa"
-        f"{aviso}"
-    )
+def ecuacion_antoine(A, B, C, T=symbols("T")):
+    """Ecuación de Antoine en forma simbólica o numérica."""
+    return exp(A - (B / (T + C)))
 
-    return procedimiento
+def temperatura_burbuja(suma_presiones, T=symbols("T")):
+    ecuacion = Eq(suma_presiones, 1)
+    solucion = nsolve(ecuacion, T, 25)  # Valor inicial de 25 °C para la búsqueda numérica
+    return solucion if solucion else None

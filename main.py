@@ -1,7 +1,6 @@
 import math
 import flet as ft
-from antoine import SUSTANCIAS
-from antoine import calcular_presion_antoine    
+from antoine import calcular_temperatura_burbuja    
 from UI import (
     crear_bloque_captura, 
     estilo_cantidad_sustancias, 
@@ -27,7 +26,8 @@ def main(page: ft.Page):
         "area_entradas": ft.Column(spacing=12),
         "area_resultados": ft.Column(spacing=12),
         "cantidad_dropdown": estilo_cantidad_sustancias(lambda e: crear_entradas(e, controles_dinamicos, elementos_UI, crear_bloque_captura)),
-        "btn_calcular": estilo_boton_calcular(lambda e: calcular_todo(e, elementos_UI, controles_dinamicos, calcular_presion_antoine)),
+        "presion_sistema_tf": ft.TextField(label="Presión del sistema (kPa)", width=300, hint_text="Ejemplo: 101.325"),
+        "btn_calcular": estilo_boton_calcular(lambda e: calcular_todo(e, elementos_UI, controles_dinamicos, calcular_temperatura_burbuja)),
         "btn_limpiar": estilo_boton_limpiar(lambda e: limpiar_todo(e, elementos_UI, controles_dinamicos))
     }
 
