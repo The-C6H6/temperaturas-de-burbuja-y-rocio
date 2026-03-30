@@ -1,5 +1,5 @@
 import flet as ft
-
+from UI.cuadro_texto import cuadro_texto
 
 def limpiar_todo(e, elementos_UI, controles_dinamicos):
         """Accion para boton limpiar; limpia dropdown, controles dinamicos, area de entradas y area de resultados"""
@@ -62,29 +62,27 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_temperatura_bur
         
 
 
-        texto = calcular_temperatura_burbuja(controles_dinamicos, float(elementos_UI["presion_sistema_tf"].value))
+        constantes,ecuacion_burbuja, ecuacion_rocio, resultado= calcular_temperatura_burbuja(controles_dinamicos, float(elementos_UI["presion_sistema_tf"].value))
 
         elementos_UI["area_resultados"].controls.append(
-                ft.Card(
-                    content=ft.Container(
-                        width=900,
-                        padding=15,
-                        content=ft.Column(
-                            controls=[
-                                ft.Text(
-                                    "Resultados:",
-                                    size=18,
-                                    weight=ft.FontWeight.BOLD,
-                                ),
-                                ft.Text(texto, selectable=True, size=15),
-                            ],
-                            spacing=10,
-                        ),
-                    )
-                )
+                cuadro_texto("Constantes", constantes)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Ecuación de Burbuja", ecuacion_burbuja)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Ecuación de Rocío", ecuacion_rocio)
+            )
+        
+        elementos_UI["area_resultados"].controls.append(
+                cuadro_texto("Resultados", resultado)
             )
 
+
         elementos_UI["area_resultados"].update()
+
 
 
 

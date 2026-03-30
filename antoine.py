@@ -58,40 +58,66 @@ def calcular_temperatura_burbuja(controles_dinamicos, presion_sistema):
     A=[SUSTANCIAS[sustancia]["A"] for sustancia in sustancias_seleccionadas]
     B=[SUSTANCIAS[sustancia]["B"] for sustancia in sustancias_seleccionadas]
     C=[SUSTANCIAS[sustancia]["C"] for sustancia in sustancias_seleccionadas]
-    suma_presiones = (1/presion_sistema)*sum([composiciones[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
-    
-    temperatura = temperatura_burbuja(suma_presiones, T)
+    suma_presiones_burbuja = (1/presion_sistema)*sum([composiciones[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    suma_presiones_rocio = presion_sistema*sum([composiciones[i] /ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
+    temperatura_burbuja_valor = encontrar_temperaturas(suma_presiones_burbuja, T)
+    temperatura_rocio_valor = encontrar_temperaturas(suma_presiones_rocio, T)
+
     resultado = ""
-    presiones=""
+    constantes = ""
+    presiones_suma_burbuja = ""
+    presiones_suma_rocio = ""
+    #Se mantiene igual
     for i in range(len(sustancias_seleccionadas)):
-        resultado += f"Sustancia {i+1}: {sustancias_seleccionadas[i]}\n"
-        resultado += f"x{i+1} = {composiciones[i]}\n"
-        resultado += f"A{i+1} = {A[i]}\n"
-        resultado += f"B{i+1} = {B[i]}\n"
-        resultado += f"C{i+1} = {C[i]}\n\n"
-        presiones += f"{composiciones[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
-        presiones += " + " if i < len(sustancias_seleccionadas)-1 else ""
+        constantes += f"Sustancia {i+1}: {sustancias_seleccionadas[i]}\n"
+        constantes += f"x{i+1} = {composiciones[i]}\n"
+        constantes += f"A{i+1} = {A[i]}\n"
+        constantes += f"B{i+1} = {B[i]}\n"
+        constantes += f"C{i+1} = {C[i]}\n\n"
 
-    resultado += "Ecuación final de burbuja:\n"
-    resultado += f"{presiones} = 1\n\n"
 
-    if isinstance(temperatura, str):
-        resultado += f"{temperatura}\n"
+        presiones_suma_burbuja += f"{composiciones[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
+        presiones_suma_burbuja += " + " if i < len(sustancias_seleccionadas)-1 else ""
+
+        presiones_suma_rocio += f"[{presion_sistema}*{composiciones[i]}]/exp[{A[i]} - ({B[i]}/(T + {C[i]}))]\n"
+        presiones_suma_rocio += " + " if i < len(sustancias_seleccionadas)-1 else ""
+
+
+    ecuacion_burbuja = "Ecuación final de burbuja:\n"
+    ecuacion_burbuja += f"{presiones_suma_burbuja} = 1\n\n\n"
+    ecuacion_rocio = "Ecuación final de rocio:\n"
+    ecuacion_rocio += f"{presiones_suma_rocio} = 1"
+
+
+
+    if isinstance(temperatura_burbuja_valor, str):
+        resultado += f"{temperatura_burbuja_valor}\n"
     else:
-        resultado += f"Temperatura de burbuja: {float(temperatura):.2f} °C\n"
+        resultado += f"Temperatura de burbuja: {float(temperatura_burbuja_valor):.2f} °C\n"
 
-    return resultado
+    if isinstance(temperatura_rocio_valor, str):
+        resultado += f"{temperatura_rocio_valor}\n" 
+    else:
+        resultado += f"Temperatura de rocío: {float(temperatura_rocio_valor):.2f} °C\n"
+
+    return constantes,ecuacion_burbuja, ecuacion_rocio,resultado
+
+
+
+
 
 
 def ecuacion_antoine(A, B, C, T=symbols("T")):
     """Ecuación de Antoine en forma simbólica o numérica."""
     return exp(A - (B / (T + C)))
 
-def temperatura_burbuja(suma_presiones, T=symbols("T")):
+
+
+
+def encontrar_temperaturas(suma_presiones, T=symbols("T")):
     ecuacion = Eq(suma_presiones, 1)
     solucion = nsolve(ecuacion, (-270, 1000), solver="bisect")
     return solucion if solucion else "Solución no encontrada"
-
 
 
 
