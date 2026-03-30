@@ -76,7 +76,7 @@ def calcular_todo(e, elementos_UI, controles_dinamicos, calcular_temperatura_bur
                                     size=18,
                                     weight=ft.FontWeight.BOLD,
                                 ),
-                                ft.Text(texto, selectable=True),
+                                ft.Text(texto, selectable=True, size=15),
                             ],
                             spacing=10,
                         ),

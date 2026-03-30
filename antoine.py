@@ -59,10 +59,26 @@ def calcular_temperatura_burbuja(controles_dinamicos, presion_sistema):
     B=[SUSTANCIAS[sustancia]["B"] for sustancia in sustancias_seleccionadas]
     C=[SUSTANCIAS[sustancia]["C"] for sustancia in sustancias_seleccionadas]
     suma_presiones = (1/presion_sistema)*sum([composiciones[i] * ecuacion_antoine(A[i], B[i], C[i], T) for i in range(len(sustancias_seleccionadas))])
-    temperatura = temperatura_burbuja(suma_presiones, T)
-    resultado = f"Ecuación:\n {suma_presiones}= 1\n"
-    resultado = f"Temperatura de burbuja: {temperatura:.2f} °C\n\n"
     
+    temperatura = temperatura_burbuja(suma_presiones, T)
+    resultado = ""
+    presiones=""
+    for i in range(len(sustancias_seleccionadas)):
+        resultado += f"Sustancia {i+1}: {sustancias_seleccionadas[i]}\n"
+        resultado += f"x{i+1} = {composiciones[i]}\n"
+        resultado += f"A{i+1} = {A[i]}\n"
+        resultado += f"B{i+1} = {B[i]}\n"
+        resultado += f"C{i+1} = {C[i]}\n\n"
+        presiones += f"{composiciones[i]}*exp[{A[i]} - ({B[i]}/(T + {C[i]}))]/{presion_sistema}\n"
+        presiones += " + " if i < len(sustancias_seleccionadas)-1 else ""
+
+    resultado += "Ecuación final de burbuja:\n"
+    resultado += f"{presiones} = 1\n\n"
+
+    if isinstance(temperatura, str):
+        resultado += f"{temperatura}\n"
+    else:
+        resultado += f"Temperatura de burbuja: {float(temperatura):.2f} °C\n"
 
     return resultado
 
@@ -73,5 +89,13 @@ def ecuacion_antoine(A, B, C, T=symbols("T")):
 
 def temperatura_burbuja(suma_presiones, T=symbols("T")):
     ecuacion = Eq(suma_presiones, 1)
-    solucion = nsolve(ecuacion, T, 25)  # Valor inicial de 25 °C para la búsqueda numérica
-    return solucion if solucion else None
+    solucion = nsolve(ecuacion, (-270, 1000), solver="bisect")
+    return solucion if solucion else "Solución no encontrada"
+
+
+
+
+
+
+
+
