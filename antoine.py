@@ -1,3 +1,7 @@
+import math
+
+
+
 SUSTANCIAS = {
     "Acetona": {"formula": "C3H6O", "A": 14.3145, "B": 2756.22, "C": 228.060, "t_min": -26, "t_max": 77},
     "Ácido acético": {"formula": "C2H4O2", "A": 15.0717, "B": 3580.80, "C": 224.650, "t_min": 24, "t_max": 142},
@@ -42,3 +46,38 @@ SUSTANCIAS = {
     "m-Xileno": {"formula": "C8H10", "A": 14.1387, "B": 3381.81, "C": 216.120, "t_min": 35, "t_max": 166},
     "p-Xileno": {"formula": "C8H10", "A": 14.0579, "B": 3331.45, "C": 214.627, "t_min": 35, "t_max": 166},
 }
+
+
+
+def calcular_presion_antoine(nombre_sustancia, temperatura):
+    datos = SUSTANCIAS[nombre_sustancia]
+    A = datos["A"]
+    B = datos["B"]
+    C = datos["C"]
+
+    valor_ln = A - (B / (temperatura + C))
+    presion = math.exp(valor_ln)
+
+    aviso = ""
+    if temperatura < datos["t_min"] or temperatura > datos["t_max"]:
+        aviso = (
+            f"\nAviso: la temperatura {temperatura:.2f} °C está fuera del intervalo "
+            f"recomendado [{datos['t_min']} a {datos['t_max']}] °C."
+        )
+
+    procedimiento = (
+        f"Sustancia: {nombre_sustancia} ({datos['formula']})\n"
+        f"A = {A}\n"
+        f"B = {B}\n"
+        f"C = {C}\n"
+        f"t = {temperatura:.2f} °C\n\n"
+        f"Procedimiento:\n"
+        f"P = Exp(A - B/(t + C))\n"
+        f"P = Exp({A} - {B}/({temperatura:.2f} + {C}))\n"
+        f"P = Exp({A} - {B/(temperatura + C):.6f})\n"
+        f"P = Exp({valor_ln:.6f})\n"
+        f"P = {presion:.6f} kPa"
+        f"{aviso}"
+    )
+
+    return procedimiento
