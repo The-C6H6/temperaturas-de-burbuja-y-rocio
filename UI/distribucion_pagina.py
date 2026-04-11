@@ -2,8 +2,9 @@ import flet as ft
 def distribucion_pagina(elementos_UI):
     return ft.Column(
             controls=[
+                ft.Container(height=50, width=50),
                 ft.Text(
-                    ft.Container(height=50, width=50),
+                    
                     "Cálculo de presión de vapor con ecuación de Antoine",
                     size=24,
                     weight=ft.FontWeight.BOLD,
