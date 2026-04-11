@@ -3,6 +3,7 @@ def distribucion_pagina(elementos_UI):
     return ft.Column(
             controls=[
                 ft.Text(
+                    ft.Container(height=50, width=50),
                     "Cálculo de presión de vapor con ecuación de Antoine",
                     size=24,
                     weight=ft.FontWeight.BOLD,
@@ -23,6 +24,7 @@ def distribucion_pagina(elementos_UI):
                     weight=ft.FontWeight.BOLD,
                 ),
                 elementos_UI["area_resultados"],
+                ft.Container(height=50, width=50),
             ],
             spacing=15,
         )
